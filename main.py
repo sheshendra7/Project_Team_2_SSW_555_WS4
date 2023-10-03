@@ -11,14 +11,14 @@ allowedTags = {
 }
 
 # Replace your file name here check data for individuals and families
-fileName = "input.ged"
+fileName = "gedcom.ged"
 
 # This function reads file and stor`e all lines in one variable
 with open(fileName, 'r') as file:
     lines = file.read().splitlines()
 lines = [[line] for line in lines]
 
-sprint1CodeOutput = open("input.ged.ged", "a")
+sprint1CodeOutput = open("gedcom.ged", "a")
 sprint1CodeOutput.truncate(0)
 
 # this for loop is finding any gedcom line with errors
