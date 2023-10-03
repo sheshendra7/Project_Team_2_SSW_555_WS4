@@ -368,7 +368,7 @@ def us02_birth_before_marriage(individuals):
     return data
 
 
-# User story US06
+# User story US05
 # Story Name: Marriage before death
 # Owner: Jack Gibson (jg)
 # Email: jgibson2@stevens.edu
