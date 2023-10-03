@@ -344,6 +344,53 @@ data = us06_divorce_before_death(families, individuals)
 print(*data, sep="\n")
 print(*data, sep="\n", file=sprint1CodeOutput)
 
+# User story US02
+# Story Name: Birth before death
+# Owner: Jack Gibson (jg)
+# Email: jgibson2@stevens.edu
+
+def us02_birth_before_marriage(individuals):
+    data = []
+    
+    for individual in individuals:
+        marriage_date = individual[IDX_IND_MARRIAGE]
+        birth_date = individual[IDX_IND_BIRTHDAY]
+        
+        if marriage_date == "NA" or birth_date == "NA":
+            continue
+
+        marriage_date = datetime.datetime.strptime(marriage_date, "%Y-%m-%d").date()
+        birth_date = datetime.datetime.strptime(birth_date, "%Y-%m-%d").date()
+
+        if marriage_date < birth_date:
+            data.append(f"ERROR: US03 Individual {individual[IDX_IND_ID]}: {individual[IDX_IND_NAME]} - Marriage date {marriage_date} is before birth date {birth_date}")
+    
+    return data
+
+
+# User story US06
+# Story Name: Marriage before death
+# Owner: Jack Gibson (jg)
+# Email: jgibson2@stevens.edu
+
+def us05_marriage_before_death(individuals):
+    data = []
+
+    for individual in individuals:
+        marriage_date = individual[IDX_IND_MARRIAGE]
+        death_date = individual[IDX_IND_DEATH]
+
+        if marriage_date == "NA" or death_date == "NA":
+            continue
+
+        marriage_date = datetime.datetime.strptime(marriage_date, "%Y-%m-%d").date()
+        death_date = datetime.datetime.strptime(death_date, "%Y-%m-%d").date()
+
+        if marriage_date > death_date:
+            data.append(f"ERROR: US06 Individual {individual[IDX_IND_ID]}: {individual[IDX_IND_NAME]} - Marriage date {marriage_date} is after death date {death_date}")
+    
+    return data
+
 
 # User story US01
 # Story Name: Dates before current date
