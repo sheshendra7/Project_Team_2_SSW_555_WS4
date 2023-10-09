@@ -498,5 +498,80 @@ data = us04_marriage_before_divorce(families)
 print(*data, sep="\n")
 print(*data, sep="\n", file=sprint1CodeOutput)
 
+# User story US07
+# Story Name: less then 150 years old ( dead )
+# Owner: Jyotiraditya deora (jd)
+# Email: jdeora@stevens.edu
+
+import datetime
+
+def us07_less_than_150_years_old(individuals):
+    errors = []
+    current_date = datetime.datetime.now().date()
+
+    for individual in individuals:
+        if individual[IDX_IND_BIRTHDAY] != 'NA' and individual[IDX_IND_DEATH] != 'NA':
+            try:
+                birth_date = datetime.datetime.strptime(str(individual[IDX_IND_BIRTHDAY]), "%Y-%m-%d").date()
+                death_date = datetime.datetime.strptime(str(individual[IDX_IND_DEATH]), "%Y-%m-%d").date()
+
+                age_at_death = death_date.year - birth_date.year - ((death_date.month, death_date.day) < (birth_date.month, birth_date.day))
+
+                if age_at_death<= 150:
+                    errors.append("ERROR: US07 Individual: {} has age at death {} years, which is 150 years or more."
+                                  .format(individual[IDX_IND_ID], age_at_death))
+
+            except ValueError:
+                errors.append("ERROR: US07 Individual: {} has invalid birth or death date format."
+                              .format(individual[IDX_IND_ID]))
+
+    return errors
+data_us07 = us07_less_than_150_years_old(individuals)
+print(*data_us07, sep="\n")
+print(*data_us07, sep="\n", file=sprint1CodeOutput)
+
+# User story US08
+# Story Name: birth before marriage of parents
+# Owner: Jyotiraditya deora (jd)
+# Email: jdeora@stevens.edu
+import datetime
+
+def us08_birth_before_marriage_of_parents(individuals, families):
+    errors = []
+    current_date = datetime.datetime.now().date()
+
+    for family in families:
+        if family[IDX_FAM_MARRIED] != 'NA':
+            try:
+                marriage_date = datetime.datetime.strptime(str(family[IDX_FAM_MARRIED]), "%Y-%m-%d").date()
+
+                for child_id in family[IDX_FAM_CHILD].split(','):
+                    child_birth_date = None
+
+                    for individual in individuals:
+                        if individual[IDX_IND_ID] == child_id and individual[IDX_IND_BIRTHDAY] != 'NA':
+                            child_birth_date = datetime.datetime.strptime(str(individual[IDX_IND_BIRTHDAY]), "%Y-%m-%d").date()
+                            break
+
+                    if child_birth_date and child_birth_date < marriage_date:
+                        errors.append("ERROR: US08 Family: {} Child: {} was born before parents' marriage date."
+                                      .format(family[IDX_FAM_ID], child_id))
+
+            except ValueError:
+                errors.append("ERROR: US08 Family: {} has invalid marriage date format."
+                              .format(family[IDX_FAM_ID]))
+
+    return errors
+
+data_us08 = us08_birth_before_marriage_of_parents(individuals, families)
+print(*data_us08, sep="\n")
+print(*data_us08, sep="\n", file=sprint1CodeOutput)
+
+
+
+
+
+
+
 
 
