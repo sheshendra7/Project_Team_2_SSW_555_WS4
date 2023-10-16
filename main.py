@@ -536,38 +536,57 @@ print(*data_us07, sep="\n", file=sprint1CodeOutput)
 # Email: jdeora@stevens.edu
 import datetime
 
+# Assuming the indices for individuals and families are defined
+IDX_FAM_MARRIED = 1
+IDX_FAM_CHILD = 7
+IDX_FAM_ID = 0
+IDX_IND_ID = 0
+IDX_IND_BIRTHDAY = 3
+
+def parse_date(date_str):
+    if isinstance(date_str, datetime.date):
+        return date_str
+    if date_str != 'NA':
+        try:
+            return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return None
+    return None
+
 def us08_birth_before_marriage_of_parents(individuals, families):
     errors = []
-    current_date = datetime.datetime.now().date()
 
     for family in families:
         if family[IDX_FAM_MARRIED] != 'NA':
-            try:
-                marriage_date = datetime.datetime.strptime(str(family[IDX_FAM_MARRIED]), "%Y-%m-%d").date()
+            marriage_date = parse_date(family[IDX_FAM_MARRIED])
 
-                for child_id in family[IDX_FAM_CHILD].split(','):
+            if marriage_date:
+                children_ids = family[IDX_FAM_CHILD].replace("'", "").replace("{", "").replace("}", "").split(", ")
+
+                for child_id in children_ids:
                     child_birth_date = None
 
                     for individual in individuals:
                         if individual[IDX_IND_ID] == child_id and individual[IDX_IND_BIRTHDAY] != 'NA':
-                            child_birth_date = datetime.datetime.strptime(str(individual[IDX_IND_BIRTHDAY]), "%Y-%m-%d").date()
+                            child_birth_date = parse_date(individual[IDX_IND_BIRTHDAY])
                             break
 
                     if child_birth_date and child_birth_date < marriage_date:
                         errors.append("ERROR: US08 Family: {} Child: {} was born before parents' marriage date."
                                       .format(family[IDX_FAM_ID], child_id))
-
-            except ValueError:
-                errors.append("ERROR: US08 Family: {} has invalid marriage date format."
-                              .format(family[IDX_FAM_ID]))
+                    else:
+                        print("DEBUG: No error found for Family: {} Child: {}".format(family[IDX_FAM_ID], child_id))
+                print("DEBUG: Checked all children for Family: {}".format(family[IDX_FAM_ID]))
+            else:
+                print("DEBUG: Invalid marriage date for Family: {}".format(family[IDX_FAM_ID]))
+        else:
+            print("DEBUG: No marriage date for Family: {}".format(family[IDX_FAM_ID]))
 
     return errors
 
+# Example usage
 data_us08 = us08_birth_before_marriage_of_parents(individuals, families)
 print(*data_us08, sep="\n")
-print(*data_us08, sep="\n", file=sprint1CodeOutput)
-
-
 # User story US21
 # Story Name: Correct gender for role
 # Owner: Jack Gibson (jg)
