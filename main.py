@@ -587,6 +587,8 @@ def us08_birth_before_marriage_of_parents(individuals, families):
 # Example usage
 data_us08 = us08_birth_before_marriage_of_parents(individuals, families)
 print(*data_us08, sep="\n")
+
+
 # User story US21
 # Story Name: Correct gender for role
 # Owner: Jack Gibson (jg)
@@ -652,85 +654,4 @@ def us42_reject_illegitimate_dates(individuals, families):
     return ["US42", "Reject Illegitimate Dates", "", valid, "\n".join(bad_dates)]
 
 
-# User story US20
-# Story Name: Aunts and Uncles
-# Owner: Jack Gibson (jg)
-# Email: jgibson2@stevens.edu
-
-def us20_aunts_and_uncles(individuals, families):
-    bad_relationships = []
-    valid = True
-
-    # Create a dictionary to map individuals to their spouses
-    spouse_map = {}
-    for family in families:
-        husband_id = family[IDX_FAM_HUSB]
-        wife_id = family[IDX_FAM_WIFE]
-        spouse_map[husband_id] = wife_id
-        spouse_map[wife_id] = husband_id
-
-    for family in families:
-        husband_id = family[IDX_FAM_HUSB]
-        wife_id = family[IDX_FAM_WIFE]
-
-        # Find the siblings of husband and wife
-        husband_siblings = set()
-        wife_siblings = set()
-
-        for ind in individuals:
-            if ind[IDX_IND_ID] in spouse_map:
-                spouse_id = spouse_map[ind[IDX_IND_ID]]
-                if spouse_id != husband_id and spouse_id != wife_id:
-                    # This person is a sibling of either the husband or wife
-                    if ind[IDX_IND_GENDER] == "M":
-                        husband_siblings.add(ind[IDX_IND_ID])
-                    else:
-                        wife_siblings.add(ind[IDX_IND_ID])
-
-        # Check if aunts/uncles are married to nieces/nephews
-        for ind in individuals:
-            ind_id = ind[IDX_IND_ID]
-            if ind[IDX_IND_ID] in spouse_map:
-                spouse_id = spouse_map[ind[IDX_IND_ID]]
-                if ind[IDX_IND_GENDER] == "M" and spouse_id in wife_siblings:
-                    bad_relationships.append(f"{ind[IDX_IND_NAME]} is married to his niece: {individuals[wife_siblings]}")
-                    valid = False
-                elif ind[IDX_IND_GENDER] == "F" and spouse_id in husband_siblings:
-                    bad_relationships.append(f"{ind[IDX_IND_NAME]} is married to her nephew: {individuals[husband_siblings]}")
-                    valid = False
-
-    return ["US20", "No Aunts and Uncles Married to Nieces and Nephews", "", valid, "\n".join(bad_relationships)]
-
-
-# User story US11
-# Story Name: No bigamy
-# Owner: Jack Gibson (jg)
-# Email: jgibson2@stevens.edu
-
-def us11_no_bigamy(individuals, families):
-    bigamous_relationships = []
-    valid = True
-
-    # Create a dictionary to track the current spouses of individuals
-    current_spouses = {}
-
-    for family in families:
-        husband_id = family[IDX_FAM_HUSB]
-        wife_id = family[IDX_FAM_WIFE]
-
-        # Check the husband's current spouse
-        if husband_id in current_spouses:
-            bigamous_relationships.append(f"{individuals[husband_id][IDX_IND_NAME]} is already married to {individuals[current_spouses[husband_id]][IDX_IND_NAME]} before marrying {individuals[wife_id][IDX_IND_NAME]}")
-            valid = False
-        else:
-            current_spouses[husband_id] = wife_id
-
-        # Check the wife's current spouse
-        if wife_id in current_spouses:
-            bigamous_relationships.append(f"{individuals[wife_id][IDX_IND_NAME]} is already married to {individuals[current_spouses[wife_id]][IDX_IND_NAME]} before marrying {individuals[husband_id][IDX_IND_NAME]}")
-            valid = False
-        else:
-            current_spouses[wife_id] = husband_id
-
-    return ["US11", "No Bigamy", "", valid, "\n".join(bigamous_relationships)]
 
