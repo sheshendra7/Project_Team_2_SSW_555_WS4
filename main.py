@@ -568,6 +568,70 @@ print(*data_us08, sep="\n")
 print(*data_us08, sep="\n", file=sprint1CodeOutput)
 
 
+# User story US21
+# Story Name: Correct gender for role
+# Owner: Jack Gibson (jg)
+# Email: jgibson2@stevens.edu
+
+def us21_reject_illegitimate_genders(individuals, families):
+    bad_genders = []
+    valid = True
+
+    for family in families:
+        husband_id = family[IDX_FAM_HUSB]
+        wife_id = family[IDX_FAM_WIFE]
+
+        husband = next((ind for ind in individuals if ind[IDX_IND_ID] == husband_id), None)
+        wife = next((ind for ind in individuals if ind[IDX_IND_ID] == wife_id), None)
+
+        if husband and husband[IDX_IND_GENDER] != "M":
+            bad_genders.append(f"Invalid gender for husband in family {family[IDX_FAM_ID]}: {husband[IDX_IND_NAME]}")
+            valid = False
+
+        if wife and wife[IDX_IND_GENDER] != "F":
+            bad_genders.append(f"Invalid gender for wife in family {family[IDX_FAM_ID]}: {wife[IDX_IND_NAME]}")
+            valid = False
+
+    return ["US42", "Reject Illegitimate Genders", "", valid, "\n".join(bad_genders)]
+
+
+# User story US42
+# Story Name: Reject Illegitimate Dates
+# Owner: Jack Gibson (jg)
+# Email: jgibson2@stevens.edu
+
+def us42_reject_illegitimate_dates(individuals, families):
+    bad_dates = []
+    valid = True
+
+    for individual in individuals:
+        birth_date = individual[IDX_IND_BIRTH]
+        marriage_date = individual[IDX_IND_MARRIAGE]
+        death_date = individual[IDX_IND_DEATH]
+
+        # Check birth date
+        if birth_date != "NA":
+            birth_date = datetime.datetime.strptime(birth_date, "%Y-%m-%d").date()
+            if birth_date.month == 2 and birth_date.day > 29:
+                bad_dates.append(f"{individual[IDX_IND_NAME]} has an illegitimate birth date: {birth_date}")
+                valid = False
+
+        # Check marriage date
+        if marriage_date != "NA":
+            marriage_date = datetime.datetime.strptime(marriage_date, "%Y-%m-%d").date()
+            if marriage_date.month == 2 and marriage_date.day > 29:
+                bad_dates.append(f"{individual[IDX_IND_NAME]} has an illegitimate marriage date: {marriage_date}")
+                valid = False
+
+        # Check death date
+        if death_date != "NA":
+            death_date = datetime.datetime.strptime(death_date, "%Y-%m-%d").date()
+            if death_date.month == 2 and death_date.day > 29:
+                bad_dates.append(f"{individual[IDX_IND_NAME]} has an illegitimate death date: {death_date}")
+                valid = False
+
+    return ["US42", "Reject Illegitimate Dates", "", valid, "\n".join(bad_dates)]
+
 
 
 
