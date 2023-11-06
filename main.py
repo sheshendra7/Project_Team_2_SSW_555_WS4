@@ -801,4 +801,146 @@ def recentDeaths(inputIndi):
 
 
 
+# User story US16
+# Story Name: Male Last Names
+# Owner: Sheshendra D(sd)
+# Email: sdesiboy@stevens.edu
+def us16_male_last_names():
+    data = []
+
+    for family in families:
+        husbandName = family[IDX_FAM_HUSBAND_NAME]
+        names = husbandName.split("/")
+        if (len(names) < 2):
+            continue
+        familyLastName = names[1].strip()
+        children_ids = family[IDX_FAM_CHILD]
+        children_ids = children_ids.replace("{", "").replace("}", "").replace("'", "").replace(" ", "").split(",")
+        for individual in individuals:
+            if (individual[IDX_IND_ID] not in children_ids):
+                continue
+            if (individual[IDX_IND_GENDER] != "M"):
+                continue
+            name = individual[IDX_IND_NAME].split("/")
+            if (len(name) < 2):
+                continue
+            lastName = name[1]
+            if (lastName != familyLastName):
+                data.append("ERROR US16 Family: " + str(family[IDX_IND_ID]) + " is having child named: " + individual[
+                    IDX_IND_NAME] + " is having different last name")
+    return data
+
+
+data = us16_male_last_names()
+print(*data, sep="\n")
+print(*data, sep="\n", file=sprint1CodeOutput)
+
+# User story US31
+# Story Name: List living single
+# Owner: Sheshendra D(sd)
+# Email: sdesiboy@stevens.edu
+def us31_list_living_single():
+    data = []
+    idOfPeopleWhoAreMarriedAtleastOne = []
+    for family in families:
+        idOfPeopleWhoAreMarriedAtleastOne.append(family[IDX_FAM_HUSBAND_ID])
+        idOfPeopleWhoAreMarriedAtleastOne.append(family[IDX_FAM_WIFE_ID])
+    for individual in individuals:
+        age = individual[IDX_IND_AGE]
+        if (age < 30):
+            continue
+        if (individual[IDX_IND_ID] in idOfPeopleWhoAreMarriedAtleastOne):
+            continue
+        if (individual[IDX_IND_DEATH] != "NA"):
+            continue
+        data.append("Error: INDIVIDUAL US31 " + str(individual[IDX_IND_ID]) + " named: " + individual[
+            IDX_IND_NAME] + " is alive, over 30 year old and never married")
+    return data
+
+
+data = us31_list_living_single()
+print(*data, sep="\n")
+print(*data, sep="\n", file=sprint1CodeOutput)
+
+
+# User story US22
+# Story Name: Unique IDs
+# Owner: Jyotiraditya deora (jd)
+# Email: jdeora@stevens.edu
+def us22_list_unique_ids(individuals, families):
+    errors = []
+    unique_individual_ids = set()
+    unique_family_ids = set()
+
+    # Check for unique individual IDs
+    for individual in individuals:
+        ind_id = individual[IDX_IND_ID]
+        if ind_id in unique_individual_ids:
+            errors.append(f"ERROR: US22: Duplicate individual ID {ind_id} found.")
+        else:
+            unique_individual_ids.add(ind_id)
+
+    # Check for unique family IDs
+    for family in families:
+        fam_id = family[IDX_FAM_ID]
+        if fam_id in unique_family_ids:
+            errors.append(f"ERROR: US22: Duplicate family ID {fam_id} found.")
+        else:
+            unique_family_ids.add(fam_id)
+
+    return errors
+
+# Assuming 'individuals' and 'families' are lists of dictionaries
+# that represent individuals and families respectively.
+# IDX_IND_ID and IDX_FAM_ID are constants that represent the index or key
+# for the ID in the individuals and families.
+
+data_us22 = us22_list_unique_ids(individuals, families)
+print(*data_us22, sep="\n")
+
+
+
+# User story US38
+# Story Name: List upcoming birthdays
+# Owner: Jyotiraditya deora (jd)
+# Email: jdeora@stevens.edu
+import datetime
+
+
+def us38_list_upcoming_birthdays(individuals):
+    upcoming_birthdays = []
+    current_date = datetime.datetime.now()
+    days_in_advance = 30  # Define how many days in advance you want to check for upcoming birthdays
+
+    for individual in individuals:
+        if individual[IDX_IND_BIRTHDAY] != 'NA':
+            try:
+                # Extract birthday and create a date object for this year's birthday
+                birth_date = datetime.datetime.strptime(str(individual[IDX_IND_BIRTHDAY]), "%Y-%m-%d").date()
+                this_years_birthday = birth_date.replace(year=current_date.year)
+
+                # Calculate the difference between today and this year's birthday
+                delta = this_years_birthday - current_date.date()
+
+                # Check if the birthday falls within the next 30 days and is not in the past
+                if 0 <= delta.days < days_in_advance:
+                    upcoming_birthdays.append("INFO: US38: Individual {} has an upcoming birthday on {}."
+                                              .format(individual[IDX_IND_ID], this_years_birthday.strftime("%Y-%m-%d")))
+
+            except ValueError:
+                # Handle the error of incorrect data format
+                upcoming_birthdays.append("ERROR: US38: Individual {} has invalid birthday date format."
+                                          .format(individual[IDX_IND_ID]))
+
+    return upcoming_birthdays
+
+
+# Example usage
+# Assuming 'individuals' is a list of dictionaries that represent individuals.
+# IDX_IND_BIRTHDAY and IDX_IND_ID are constants that represent the index or key
+# for the birthday and ID in the individuals.
+
+data_us38 = us38_list_upcoming_birthdays(individuals)
+print(*data_us38, sep="\n")
+
 
