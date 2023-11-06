@@ -739,6 +739,66 @@ def us11_no_bigamy(individuals, families):
 
 
 
+# User story US34
+# Story Name: List large age differences
+# Owner: Jack Gibson (jg)
+# Email: jgibson2@stevens.edu
+
+from datetime import datetime, timedelta
+
+def largeAgeDifferences(inputIndi, inputFam):
+    errors = []
+    # Create dictionaries for quick lookup
+    individuals = {indi[0]: datetime.strptime(indi[3], '%Y-%m-%d') for indi in inputIndi}
+    
+    for fam in inputFam:
+        if fam[1] != "NA":
+            try:
+                husbandBirthDate = individuals.get(fam[3], datetime.min)
+                wifeBirthDate = individuals.get(fam[5], datetime.min)
+                marriageDate = datetime.strptime(fam[1], '%Y-%m-%d')
+                
+                ageDiffHusband = marriageDate - husbandBirthDate
+                ageDiffWife = marriageDate - wifeBirthDate
+
+                if ageDiffHusband >= ageDiffWife * 2:
+                    errors.append(f"ERROR: INDIVIDUAL: US34: {fam[3]} is over twice as old as {fam[5]} at their time of marriage")
+                if ageDiffWife >= ageDiffHusband * 2:
+                    errors.append(f"ERROR: INDIVIDUAL: US34: {fam[5]} is over twice as old as {fam[3]} at their time of marriage")
+                
+            except ValueError as e:
+                print(f"Invalid date format encountered: {e}")
+
+    for error in errors:
+        print(error)
+        
+    return errors
+
+
+
+
+# User story US36
+# Story Name: List recent deaths
+# Owner: Jack Gibson (jg)
+# Email: jgibson2@stevens.edu
+
+def recentDeaths(inputIndi):
+    notes = []
+    todayDate = datetime.now()
+
+    for indi in inputIndi:
+        if indi[5] != "True":  # Assuming 'True' means alive
+            try:
+                deathDate = datetime.strptime(indi[6], '%Y-%m-%d')
+                if (todayDate - deathDate).days < 30:
+                    note = f"NOTE: INDIVIDUAL: US36: ID: {indi[0]}: Death has occurred within the past 30 days"
+                    print(note)
+                    notes.append(note)
+            except ValueError as e:
+                print(f"Invalid date format for death date encountered: {e}")
+
+    return notes
+
 
 
 
