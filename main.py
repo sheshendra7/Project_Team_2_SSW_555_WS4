@@ -942,4 +942,127 @@ def recentDeaths(inputIndi):
                 print(f"Invalid date format for death date encountered: {e}")
 
     return notes
+    
+# User story US39
+# Story Name: List upcoming Anniversaries
+# Owner: Jyotiraditya deora (jd)
+# Email: jdeora@stevens.edu
+from datetime import datetime, timedelta
 
+def us39_list_upcoming_anniversaries(families, current_date=datetime.now()):
+    upcoming_anniversaries = []
+
+    for family in families:
+        marriage_date_str = family[IDX_FAM_MARRIAGE_DATE]
+        if marriage_date_str:
+            marriage_date = datetime.strptime(marriage_date_str, "%Y-%m-%d")
+            anniversary_date = marriage_date.replace(year=current_date.year)
+
+            # Check if anniversary is within the next 30 days
+            if 0 <= (anniversary_date - current_date).days <= 30:
+                output_string = f"NOTICE: US39 FAMILY: {family[IDX_FAM_ID]} anniversary on {anniversary_date.strftime('%Y-%m-%d')}"
+                upcoming_anniversaries.append(output_string)
+
+    return upcoming_anniversaries
+
+# Example usage
+data = us39_list_upcoming_anniversaries(families)
+print(*data, sep="\n")
+
+# User story US15
+# Story Name: Less than 15 siblings
+# Owner: Jyotiraditya deora (jd)
+# Email: jdeora@stevens.edu
+def us15_less_than_15_siblings(families):
+    data = []
+
+    for family in families:
+        children_ids = family[IDX_FAM_CHILD]
+        if not children_ids:  # No children in this family
+            continue
+
+        children_ids = children_ids.replace("{", "").replace("}", "").replace("'", "").replace(" ", "").split(",")
+        num_of_children = len(children_ids)
+
+        if num_of_children >= 15:
+            output_string = f"ERROR: US15 FAMILY: {family[IDX_FAM_ID]} has {num_of_children} siblings, which is not less than 15."
+            data.append(output_string)
+
+    return data
+
+# Example usage
+data = us15_less_than_15_siblings(families)
+print(*data, sep="\n")
+
+# User story US28
+# Story Name: order siblings by age
+# Owner: Sheshendra d (sd)
+# Email: sdesiboy@stevens.edu
+def us28_order_siblings_by_age():
+    data = []
+
+    for family in families:
+        children_ids = family[IDX_FAM_CHILD]
+        children_ids = children_ids.replace("{", "").replace("}", "").replace("'", "").replace(" ", "").split(",")
+        childrens = []
+        for child in children_ids:
+            for individual in individuals:
+                if child == individual[IDX_IND_ID]:
+                    childrens.append(individual)
+        if (len(childrens) <= 0):
+            continue
+
+        # Use a lambda function to handle None values by assigning a default value for sorting
+        childrens = sorted(childrens, key=lambda x: x[IDX_IND_AGE] if x[IDX_IND_AGE] is not None else float('inf'), reverse=True)
+
+        outputString = "ERROR: US28 FAMILY: " + str(family[IDX_FAM_ID]) + " sorted siblings (oldest first): "
+        for child in childrens:
+            outputString += "ID:" + str(child[IDX_IND_ID]) + " Age: " + str(child[IDX_IND_AGE]) + " |-| "
+        outputString = outputString[:-5]
+        data.append(outputString)
+    return data
+
+
+
+data = us28_order_siblings_by_age()
+print(*data, sep="\n")
+print(*data, sep="\n", file=sprint1CodeOutput)
+
+# User story US32
+# Story Name: list orphaned child
+# Owner: Sheshendra d (sd)
+# Email: sdesiboy@stevens.edu
+def get_individual_age(individual_id):
+    for individual in individuals:
+        if individual[IDX_IND_ID] == individual_id:
+            birthdate = individual[IDX_IND_BIRTHDAY]
+            if birthdate == "NA":
+                return None
+            birthdate = datetime.datetime.strptime(birthdate, "%Y-%m-%d").date()
+            today = datetime.date.today()
+            age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+            return age
+    return None
+
+def us32_list_orphaned_children():
+    data = []
+    for family in families:
+        husband_id = family[IDX_FAM_HUSBAND_ID]
+        wife_id = family[IDX_FAM_WIFE_ID]
+        children = family[IDX_FAM_CHILD]
+        deceased_ids = us_29_List_deceased();
+
+        # Check if both parents are dead
+        if (husband_id in deceased_ids) and (wife_id in deceased_ids):
+            for child_id in children:
+                # Check if child is less than 18 years old
+                child_age = get_individual_age(child_id)
+                if child_age is not None and child_age < 18:
+                    data.append("Error: INDIVIDUAL US32 " + str(child_id) +
+                                " is an orphan (both parents are dead and child is less than 18 years old)")
+
+    return data
+
+data = us32_list_orphaned_children()
+print(*data, sep="\n")
+print(*data, sep="\n", file=sprint1CodeOutput)
